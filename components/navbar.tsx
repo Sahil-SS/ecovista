@@ -13,10 +13,18 @@ const navLinks = [
   { label: "Gallery", href: "#gallery" },
 ];
 
-export default function Navbar() {
+interface NavbarProps {
+  onOpenEnquiry: () => void;
+  onMenuToggle?: (open: boolean) => void;
+}
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+export default function Navbar({ onOpenEnquiry, onMenuToggle }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Navbar scroll appearance.
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
@@ -33,44 +41,39 @@ export default function Navbar() {
     };
   }, []);
 
+  // Keep the parent informed about the mobile menu state.
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    onMenuToggle?.(isMenuOpen);
 
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isMenuOpen]);
+  }, [isMenuOpen, onMenuToggle]);
 
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
 
+  const handleMobileEnquiry = () => {
+    closeMenu();
+    onOpenEnquiry();
+  };
+
   return (
     <>
-      {/* =========================================================
-          NAVBAR
-      ========================================================= */}
+      {/* NAVBAR */}
 
       <motion.header
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{
-          duration: 0.7,
-          ease: [0.22, 1, 0.36, 1],
-        }}
+        transition={{ duration: 0.7, ease }}
         className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
           isScrolled
             ? "bg-[#0c2d20]/75 shadow-[0_8px_30px_rgba(0,0,0,0.15)] backdrop-blur-md"
             : "bg-transparent"
         }`}
       >
-        {/* =======================================================
-            SUBTLE TOP GRADIENT
-
-            This is NOT a visible box.
-            It simply improves readability over the hero image.
-        ======================================================= */}
-
         {!isScrolled && (
           <div
             className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/30 via-black/10 to-transparent"
@@ -84,16 +87,14 @@ export default function Navbar() {
             isScrolled ? "h-[76px]" : "h-[90px]"
           }`}
         >
-          {/* =====================================================
-              LOGO
-          ===================================================== */}
+          {/* LOGO */}
 
           <Link
             href="/"
             aria-label="EcoVista home"
             className="group relative z-[60] flex shrink-0 items-center gap-3"
+            onClick={closeMenu}
           >
-            {/* Botanical Mark */}
             <div className="flex h-11 w-11 items-center justify-center">
               <svg
                 viewBox="0 0 48 48"
@@ -108,7 +109,6 @@ export default function Navbar() {
                   strokeWidth="1.5"
                   strokeLinecap="round"
                 />
-
                 <path
                   d="M24 18C19 13 14 13 11 14C12 19 16 23 24 23"
                   stroke="#D2AF68"
@@ -116,7 +116,6 @@ export default function Navbar() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-
                 <path
                   d="M24 14C28 9 33 8 37 9C36 15 32 19 24 20"
                   stroke="#D2AF68"
@@ -124,7 +123,6 @@ export default function Navbar() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-
                 <path
                   d="M24 25C19 21 15 22 12 24C14 29 18 31 24 30"
                   stroke="#D2AF68"
@@ -132,7 +130,6 @@ export default function Navbar() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-
                 <path
                   d="M24 23C29 19 34 20 37 22C35 27 31 29 24 29"
                   stroke="#D2AF68"
@@ -143,7 +140,6 @@ export default function Navbar() {
               </svg>
             </div>
 
-            {/* Wordmark */}
             <div className="flex flex-col leading-none">
               <span
                 className="font-serif text-[22px] font-medium tracking-[0.08em] text-[#fffaf0]"
@@ -160,9 +156,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* =====================================================
-              DESKTOP NAVIGATION
-          ===================================================== */}
+          {/* DESKTOP NAVIGATION */}
 
           <div className="hidden items-center lg:flex">
             <div className="flex items-center gap-8 xl:gap-10">
@@ -182,12 +176,9 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* =================================================
-                RIGHT ACTIONS
-            ================================================= */}
+            {/* DESKTOP ACTIONS */}
 
             <div className="ml-10 flex items-center gap-5">
-              {/* Phone */}
               <a
                 href="tel:+917488613737"
                 aria-label="Call EcoVista"
@@ -208,26 +199,25 @@ export default function Navbar() {
                 </span>
               </a>
 
-              {/* Book Visit */}
-              <Link
-                href="#contact"
+              {/* CONNECTED TO SHARED ENQUIRY FORM */}
+
+              <button
+                type="button"
+                onClick={onOpenEnquiry}
                 className="group flex items-center gap-2 border border-[#d2af68] bg-[#d2af68] px-5 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#102f21] shadow-[0_5px_18px_rgba(0,0,0,0.18)] transition-all duration-300 hover:bg-[#e0c17a]"
               >
                 Book a Visit
-
                 <ArrowUpRight
                   size={14}
                   strokeWidth={1.8}
                   aria-hidden="true"
                   className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 />
-              </Link>
+              </button>
             </div>
           </div>
 
-          {/* =====================================================
-              MOBILE MENU BUTTON
-          ===================================================== */}
+          {/* MOBILE MENU BUTTON */}
 
           <button
             type="button"
@@ -264,9 +254,7 @@ export default function Navbar() {
         </nav>
       </motion.header>
 
-      {/* =========================================================
-          MOBILE NAVIGATION
-      ========================================================= */}
+      {/* MOBILE NAVIGATION */}
 
       <AnimatePresence>
         {isMenuOpen && (
@@ -278,20 +266,20 @@ export default function Navbar() {
             transition={{ duration: 0.35 }}
             className="fixed inset-0 z-40 bg-[#0c2d20] lg:hidden"
           >
-            {/* Decorative background */}
+            {/* DECORATIVE BACKGROUND */}
+
             <div
               className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.06]"
               aria-hidden="true"
             >
               <div className="absolute -right-20 top-20 h-80 w-80 rounded-full border border-[#d2af68]" />
-
               <div className="absolute -right-10 top-32 h-64 w-64 rounded-full border border-[#d2af68]" />
-
               <div className="absolute -bottom-20 -left-32 h-96 w-96 rounded-full border border-[#d2af68]" />
             </div>
 
-            <div className="flex h-full flex-col justify-between px-6 pb-8 pt-32 sm:px-10">
-              {/* Mobile links */}
+            <div className="flex h-full flex-col justify-between overflow-y-auto px-6 pb-8 pt-32 sm:px-10">
+              {/* MOBILE LINKS */}
+
               <div>
                 <p className="mb-8 text-[10px] font-semibold uppercase tracking-[0.3em] text-[#d2af68]">
                   Explore EcoVista
@@ -306,7 +294,7 @@ export default function Navbar() {
                       transition={{
                         duration: 0.45,
                         delay: 0.08 + index * 0.06,
-                        ease: [0.22, 1, 0.36, 1],
+                        ease,
                       }}
                     >
                       <Link
@@ -330,15 +318,13 @@ export default function Navbar() {
                 </div>
               </div>
 
-              {/* Bottom actions */}
+              {/* MOBILE ACTIONS */}
+
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  delay: 0.45,
-                  duration: 0.4,
-                }}
-                className="space-y-5"
+                transition={{ delay: 0.45, duration: 0.4 }}
+                className="mt-8 space-y-5"
               >
                 <div className="h-px w-full bg-white/10" />
 
@@ -356,19 +342,20 @@ export default function Navbar() {
                   <span>+91 74886 13737</span>
                 </a>
 
-                <Link
-                  href="#contact"
-                  onClick={closeMenu}
+                {/* CONNECTED TO SHARED ENQUIRY FORM */}
+
+                <button
+                  type="button"
+                  onClick={handleMobileEnquiry}
                   className="flex w-full items-center justify-center gap-2 bg-[#d2af68] px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#102f21] transition-colors duration-300 hover:bg-[#e0c17a]"
                 >
                   Book a Site Visit
-
                   <ArrowUpRight
                     size={15}
                     strokeWidth={1.8}
                     aria-hidden="true"
                   />
-                </Link>
+                </button>
               </motion.div>
             </div>
           </motion.div>

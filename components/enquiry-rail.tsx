@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -6,17 +8,18 @@ import { ArrowUpRight, X } from "lucide-react";
 
 interface EnquiryRailProps {
   hidden?: boolean;
+  openTrigger?: number;
 }
 
-type FormData = {
+interface EnquiryFormData {
   name: string;
   phone: string;
   email: string;
-};
+}
 
 type Status = "idle" | "loading" | "success" | "error";
 
-const initialFormData: FormData = {
+const initialFormData: EnquiryFormData = {
   name: "",
   phone: "",
   email: "",
@@ -24,12 +27,24 @@ const initialFormData: FormData = {
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
+export default function EnquiryRail({
+  hidden = false,
+  openTrigger = 0,
+}: EnquiryRailProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [formData, setFormData] = useState<EnquiryFormData>(initialFormData);
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
 
+  // Open the same form when requested by the navbar.
+  useEffect(() => {
+    if (openTrigger > 0) {
+      setStatus("idle");
+      setIsOpen(true);
+    }
+  }, [openTrigger]);
+
+  // Escape key and background scroll management.
   useEffect(() => {
     if (!isOpen) return;
 
@@ -118,7 +133,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
 
   return (
     <>
-      {/* FLOATING ENQUIRY RAIL */}
+      {/* FLOATING ENQUIRY SIDEBAR */}
 
       <AnimatePresence>
         {!hidden && !isOpen && (
@@ -139,6 +154,8 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                 Enquire Now
               </span>
             </button>
+
+            {/* WHATSAPP */}
 
             <a
               href="https://wa.me/917488613737"
@@ -172,7 +189,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closePanel}
-              className="fixed inset-0 z-50 cursor-default bg-[#082F27]/45"
+              className="fixed inset-0 z-50 cursor-default bg-[#082F27]/50 backdrop-blur-[1px]"
             />
 
             <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-3 sm:p-5">
@@ -180,11 +197,11 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="ecovista-enquiry-title"
-                initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                initial={{ opacity: 0, scale: 0.97, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.97, y: 8 }}
                 transition={{ duration: 0.3, ease }}
-                className="pointer-events-auto relative my-auto w-full max-w-[390px] bg-[#C9A45C] px-5 pb-5 pt-7 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:px-7 sm:pb-6 sm:pt-8"
+                className="pointer-events-auto relative my-auto w-full max-w-[390px] overflow-visible bg-[#C9A45C] px-5 pb-5 pt-9 shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:px-6 sm:pb-6 sm:pt-9"
               >
                 {/* CLOSE BUTTON */}
 
@@ -192,34 +209,35 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                   type="button"
                   onClick={closePanel}
                   disabled={status === "loading"}
-                  aria-label="Close popup"
-                  className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#F7F4EC] text-[#17241F] shadow-md transition-colors hover:bg-[#EFEBD9] disabled:opacity-50"
+                  aria-label="Close enquiry form"
+                  className="absolute -right-1 -top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#F7F4EC] text-[#17241F] shadow-md transition-transform duration-300 hover:rotate-90 disabled:opacity-50 sm:-right-2 sm:-top-2"
                 >
-                  <X size={17} aria-hidden="true" />
+                  <X size={20} strokeWidth={1.8} aria-hidden="true" />
                 </button>
 
-                {/* TITLE */}
+                {/* HEADING */}
 
-                <div className="mb-5 text-center">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#082F27]/70">
+                <div className="text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-[#174C3C]">
                     Eco Vista Township
                   </p>
 
                   <h2
                     id="ecovista-enquiry-title"
-                    className="mt-2 font-serif text-[25px] leading-tight text-white sm:text-[27px]"
+                    className="mt-2 text-[18px] font-extrabold uppercase leading-tight tracking-[-0.02em] text-[#11140F] sm:text-[20px]"
                   >
-                    Book your dream home
+                    Your Dream Home Start Here
                   </h2>
-
-                  <p className="mt-1 text-[13px] text-[#082F27]">
-                    Schedule your site visit today.
-                  </p>
                 </div>
 
-                {/* FORM */}
+                <p className="mt-4 text-[15px] font-bold leading-[1.35] text-[#11140F] sm:text-[16px]">
+                  Book your exclusive site visit today and take the 1st step
+                  towards owning your Dream property
+                </p>
 
-                <form onSubmit={handleSubmit}>
+                {/* FORM FIELDS */}
+
+                <form onSubmit={handleSubmit} className="mt-5">
                   <div className="space-y-3">
                     <input
                       type="text"
@@ -230,7 +248,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                       required
                       value={formData.name}
                       onChange={handleChange}
-                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                      className="h-10 w-full border-0 border-b-2 border-white bg-transparent px-0 text-[16px] font-semibold text-[#17241F] outline-none placeholder:font-semibold placeholder:text-white focus:border-[#174C3C]"
                     />
 
                     <input
@@ -244,7 +262,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                       required
                       value={formData.phone}
                       onChange={handleChange}
-                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                      className="h-10 w-full border-0 border-b-2 border-white bg-transparent px-0 text-[16px] font-semibold text-[#17241F] outline-none placeholder:font-semibold placeholder:text-white focus:border-[#174C3C]"
                     />
 
                     <input
@@ -256,19 +274,19 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                       required
                       value={formData.email}
                       onChange={handleChange}
-                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                      className="h-10 w-full border-0 border-b-2 border-white bg-transparent px-0 text-[16px] font-semibold text-[#17241F] outline-none placeholder:font-semibold placeholder:text-white focus:border-[#174C3C]"
                     />
                   </div>
 
                   {/* CONSENT */}
 
-                  <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-[10px] leading-[1.45] text-[#082F27] sm:text-[11px]">
+                  <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-[11px] font-medium leading-[1.45] text-[#17241F] sm:text-xs">
                     <input
                       type="checkbox"
                       checked={consent}
                       onChange={(event) => setConsent(event.target.checked)}
                       required
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#174C3C]"
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#174C3C]"
                     />
 
                     <span>
@@ -283,7 +301,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                   {status === "error" && (
                     <p
                       role="alert"
-                      className="mt-3 text-xs font-medium text-[#7A2018]"
+                      className="mt-3 text-xs font-semibold text-[#7A2018]"
                     >
                       We could not submit your enquiry. Please check your
                       details and try again.
@@ -293,31 +311,40 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                   {status === "success" && (
                     <p
                       role="status"
-                      className="mt-3 text-center text-xs font-semibold text-[#082F27]"
+                      className="mt-3 text-center text-xs font-bold text-[#082F27]"
                     >
-                      Thank you. Your enquiry has been submitted.
+                      Thank you! Your enquiry has been submitted.
                     </p>
                   )}
 
-                  {/* SUBMIT */}
+                  {/* CTA BUTTON */}
 
                   <button
                     type="submit"
                     disabled={status === "loading" || status === "success"}
-                    className="mx-auto mt-5 flex min-h-11 w-[155px] items-center justify-center gap-2 rounded-xl bg-[#174C3C] px-5 py-3 text-sm font-bold text-white shadow-[0_4px_0_#082F27] transition-colors hover:bg-[#082F27] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="group mx-auto mt-6 flex min-h-12 w-[170px] items-center justify-center gap-2 rounded-xl bg-[#174C3C] px-5 py-3 text-[15px] font-extrabold text-white shadow-[0_4px_0_#082F27] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#082F27] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {status === "loading"
-                      ? "Submitting..."
-                      : status === "success"
-                        ? "Submitted"
-                        : "Enquire Now"}
+                    <span>
+                      {status === "loading"
+                        ? "Submitting..."
+                        : status === "success"
+                          ? "Submitted"
+                          : "Enquire Now"}
+                    </span>
 
                     {status !== "loading" && status !== "success" && (
-                      <ArrowUpRight size={15} aria-hidden="true" />
+                      <ArrowUpRight
+                        size={17}
+                        strokeWidth={2}
+                        aria-hidden="true"
+                        className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                      />
                     )}
                   </button>
 
-                  <p className="mt-4 text-center text-[10px] text-[#082F27]/80">
+                  {/* PHONE CONTACT */}
+
+                  {/* <p className="mt-4 text-center text-[15px] font-medium text-[#17241F]/80">
                     Prefer to call?{" "}
                     <a
                       href="tel:+917488613737"
@@ -325,7 +352,7 @@ export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
                     >
                       +91 74886 13737
                     </a>
-                  </p>
+                  </p> */}
                 </form>
               </motion.div>
             </div>

@@ -13,11 +13,16 @@ import Gallery from "@/components/gallery";
 import Contact from "@/components/contact";
 
 export default function Home() {
-  const [menuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [enquiryTrigger, setEnquiryTrigger] = useState(0);
+
+  const openEnquiry = () => {
+    setEnquiryTrigger((previous) => previous + 1);
+  };
 
   return (
     <main>
-      <Navbar />
+      <Navbar onOpenEnquiry={openEnquiry} onMenuToggle={setMenuOpen} />
 
       <Hero />
 
@@ -33,7 +38,7 @@ export default function Home() {
 
       <Contact />
 
-      <EnquiryRail hidden={menuOpen} />
+      <EnquiryRail hidden={menuOpen} openTrigger={enquiryTrigger} />
     </main>
   );
 }
