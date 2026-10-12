@@ -1,15 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowUpRight,
-  Mail,
-  MessageSquare,
-  Phone,
-  User,
-  X,
-} from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
 
 interface EnquiryRailProps {
   hidden?: boolean;
@@ -17,31 +10,46 @@ interface EnquiryRailProps {
 
 type FormData = {
   name: string;
-  email: string;
   phone: string;
-  message: string;
+  email: string;
 };
 
 type Status = "idle" | "loading" | "success" | "error";
 
 const initialFormData: FormData = {
   name: "",
-  email: "",
   phone: "",
-  message: "",
+  email: "",
 };
 
-export default function EnquiryRail({
-  hidden = false,
-}: EnquiryRailProps) {
+const ease = [0.22, 1, 0.36, 1] as const;
+
+export default function EnquiryRail({ hidden = false }: EnquiryRailProps) {
   const [isOpen, setIsOpen] = useState(false);
-
-  const [formData, setFormData] =
-    useState<FormData>(initialFormData);
-
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && status !== "loading") {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [isOpen, status]);
+
   const openPanel = () => {
+    setStatus("idle");
     setIsOpen(true);
   };
 
@@ -51,11 +59,7 @@ export default function EnquiryRail({
     }
   };
 
-  const handleChange = (
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
-  ) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setFormData((previous) => ({
@@ -64,61 +68,49 @@ export default function EnquiryRail({
     }));
   };
 
-  const handleSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!consent) {
+      setStatus("error");
+      return;
+    }
 
     setStatus("loading");
 
     try {
       const payload = new FormData();
 
-      /*
-       * Replace this access key with your EcoVista Web3Forms key
-       * if you have a separate one.
-       */
-      payload.append(
-        "access_key",
-        "1451740e-965b-41de-b42d-eed139082b34"
-      );
-
-      payload.append(
-        "subject",
-        "New EcoVista Site Visit Enquiry"
-      );
-
-      payload.append(
-        "from_name",
-        "EcoVista Website"
-      );
-
+      payload.append("access_key", "1451740e-965b-41de-b42d-eed139082b34");
+      payload.append("subject", "New EcoVista Site Visit Enquiry");
+      payload.append("from_name", "EcoVista Website");
       payload.append("name", formData.name);
-      payload.append("email", formData.email);
       payload.append("phone", formData.phone);
-      payload.append("message", formData.message);
-
-      const response = await fetch(
-        "https://api.web3forms.com/submit",
-        {
-          method: "POST",
-          body: payload,
-        }
+      payload.append("email", formData.email);
+      payload.append(
+        "message",
+        "A visitor has requested an EcoVista site visit.",
       );
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: payload,
+      });
 
       const result = await response.json();
 
-      if (result.success) {
-        setStatus("success");
-        setFormData(initialFormData);
-
-        setTimeout(() => {
-          setIsOpen(false);
-          setStatus("idle");
-        }, 2200);
-      } else {
-        setStatus("error");
+      if (!response.ok || !result.success) {
+        throw new Error("Submission failed");
       }
+
+      setStatus("success");
+      setFormData(initialFormData);
+      setConsent(false);
+
+      window.setTimeout(() => {
+        setIsOpen(false);
+        setStatus("idle");
+      }, 2000);
     } catch {
       setStatus("error");
     }
@@ -126,404 +118,217 @@ export default function EnquiryRail({
 
   return (
     <>
-      {/* =====================================================
-          FLOATING ENQUIRY RAIL
-      ===================================================== */}
+      {/* FLOATING ENQUIRY RAIL */}
 
       <AnimatePresence>
         {!hidden && !isOpen && (
           <motion.div
-            initial={{
-              opacity: 0,
-              x: 35,
-            }}
-            animate={{
-              opacity: 1,
-              x: 0,
-            }}
-            exit={{
-              opacity: 0,
-              x: 35,
-            }}
-            transition={{
-              duration: 0.5,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="fixed right-0 top-1/2 z-40 -translate-y-1/2"
+            initial={{ opacity: 0, x: 24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 24 }}
+            transition={{ duration: 0.4, ease }}
+            className="fixed right-0 top-1/2 z-40 flex -translate-y-1/2 flex-col overflow-hidden rounded-l-lg shadow-lg"
           >
-            <div className="flex flex-col overflow-hidden rounded-l-sm shadow-[0_12px_40px_rgba(0,0,0,0.22)]">
-              {/* =================================================
-                  BOOK A VISIT
-              ================================================= */}
+            <button
+              type="button"
+              onClick={openPanel}
+              aria-label="Open enquiry form"
+              className="flex h-[115px] w-11 items-center justify-center bg-[#C9A45C] transition-colors hover:bg-[#DFC587] sm:h-[130px] sm:w-12"
+            >
+              <span className="rotate-180 [writing-mode:vertical-rl] text-[10px] font-bold uppercase tracking-[0.16em] text-[#082F27]">
+                Enquire Now
+              </span>
+            </button>
 
-              <button
-                type="button"
-                onClick={openPanel}
-                aria-label="Open book a site visit form"
-                className="group relative flex h-[145px] w-12 items-center justify-center overflow-hidden bg-[#d2af68] transition-colors duration-300 hover:bg-[#dfc17c] sm:h-[155px] sm:w-[52px]"
+            <a
+              href="https://wa.me/917488613737"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Contact EcoVista on WhatsApp"
+              className="group flex h-11 w-11 items-center justify-center bg-[#174C3C] text-white transition-colors duration-300 hover:bg-[#082F27] sm:h-12 sm:w-12"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-6 w-6 transition-transform duration-300 group-hover:scale-110"
+                fill="currentColor"
+                aria-hidden="true"
               >
-                {/* Subtle shine */}
-                <span className="absolute inset-0 -translate-x-full bg-white/15 transition-transform duration-700 group-hover:translate-x-full" />
-
-                <span className="relative z-10 [writing-mode:vertical-rl] rotate-180 text-[10px] font-bold uppercase tracking-[0.2em] text-[#102f21]">
-                  Book a Visit
-                </span>
-              </button>
-
-              {/* =================================================
-                  WHATSAPP
-              ================================================= */}
-
-              <a
-                href="https://wa.me/917488613737"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Contact EcoVista on WhatsApp"
-                className="group flex h-12 w-12 items-center justify-center bg-[#1d8c57] transition-colors duration-300 hover:bg-[#25a866] sm:h-[52px] sm:w-[52px]"
-              >
-                <svg
-                  viewBox="0 0 32 32"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 fill-white transition-transform duration-300 group-hover:scale-110"
-                  aria-hidden="true"
-                >
-                  <path d="M16.04 2.01C8.31 2.01 2.04 8.28 2.04 16.01c0 2.82.74 5.55 2.16 7.97L2 30l6.21-2.16c2.33 1.28 4.96 1.97 7.83 1.97 7.72 0 14-6.27 14-13.99.01-7.74-6.26-13.81-13.99-13.81zm0 25.3c-2.62 0-5.1-.77-7.23-2.23l-.52-.33-3.7 1.3 1.27-3.6-.34-.56a12.42 12.42 0 0 1-1.88-6.6c0-6.86 5.57-12.43 12.43-12.43s12.43 5.57 12.43 12.43c0 6.86-5.58 12.42-12.46 12.42zm7.14-9.33c-.39-.2-2.3-1.14-2.66-1.27-.36-.13-.62-.2-.87.2-.26.39-1 1.27-1.23 1.54-.23.26-.46.29-.85.1-.39-.2-1.64-.6-3.13-1.91-1.16-1.03-1.94-2.3-2.17-2.69-.23-.39-.02-.6.17-.79.18-.18.39-.46.59-.69.2-.23.26-.39.39-.65.13-.26.07-.49-.03-.69-.1-.2-.87-2.1-1.2-2.88-.32-.78-.66-.67-.87-.67-.23 0-.49-.03-.75-.03-.26 0-.69.1-1.06.49-.36.39-1.39 1.36-1.39 3.32 0 1.97 1.42 3.87 1.62 4.14.2.26 2.8 4.27 6.81 5.99 4.01 1.72 4.01 1.15 4.72 1.08.72-.07 2.3-.94 2.63-1.85.33-.91.33-1.69.23-1.85-.1-.16-.36-.26-.75-.46z" />
-                </svg>
-              </a>
-            </div>
+                <path d="M20.52 3.48A11.87 11.87 0 0 0 12.05 0C5.43 0 .05 5.38.05 12c0 2.12.56 4.19 1.62 6.02L0 24l6.14-1.61A11.94 11.94 0 0 0 12.05 24C18.67 24 24.05 18.62 24.05 12c0-3.2-1.25-6.21-3.53-8.52ZM12.05 22a9.93 9.93 0 0 1-5.06-1.38l-.36-.21-3.64.95.97-3.55-.23-.37A9.95 9.95 0 0 1 2.05 12c0-5.51 4.49-10 10-10 2.67 0 5.18 1.04 7.07 2.93A9.94 9.94 0 0 1 22.05 12c0 5.51-4.49 10-10 10Zm5.49-7.48c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.23-.65.08-.3-.15-1.27-.47-2.42-1.49-.9-.8-1.5-1.79-1.68-2.09-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.64-.93-2.25-.24-.59-.49-.51-.68-.52h-.58c-.2 0-.53.08-.81.38-.28.3-1.06 1.03-1.06 2.52 0 1.49 1.08 2.93 1.23 3.13.15.2 2.13 3.25 5.15 4.55.72.31 1.28.49 1.72.63.72.23 1.38.2 1.9.12.58-.09 1.77-.73 2.02-1.43.25-.7.25-1.3.18-1.43-.08-.13-.28-.2-.58-.35Z" />
+              </svg>
+            </a>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* =====================================================
-          ENQUIRY PANEL
-      ===================================================== */}
+      {/* COMPACT ENQUIRY POPUP */}
 
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* =================================================
-                BACKDROP
-            ================================================= */}
-
             <motion.button
               type="button"
-              aria-label="Close enquiry panel"
+              aria-label="Close enquiry form"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.35 }}
               onClick={closePanel}
-              className="fixed inset-0 z-50 cursor-default bg-[#071c13]/65 backdrop-blur-[3px]"
+              className="fixed inset-0 z-50 cursor-default bg-[#082F27]/45"
             />
 
-            {/* =================================================
-                SLIDING PANEL
-            ================================================= */}
+            <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto p-3 sm:p-5">
+              <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ecovista-enquiry-title"
+                initial={{ opacity: 0, scale: 0.96, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.97, y: 8 }}
+                transition={{ duration: 0.3, ease }}
+                className="pointer-events-auto relative my-auto w-full max-w-[390px] bg-[#C9A45C] px-5 pb-5 pt-7 shadow-[0_20px_60px_rgba(0,0,0,0.25)] sm:px-7 sm:pb-6 sm:pt-8"
+              >
+                {/* CLOSE BUTTON */}
 
-            <motion.aside
-              initial={{
-                x: "100%",
-              }}
-              animate={{
-                x: 0,
-              }}
-              exit={{
-                x: "100%",
-              }}
-              transition={{
-                duration: 0.65,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="fixed right-0 top-0 z-[60] h-[100dvh] w-full overflow-y-auto bg-[#102f21] text-[#f5f0df] shadow-[-20px_0_70px_rgba(0,0,0,0.25)] sm:max-w-[470px]"
-            >
-              {/* Decorative circles */}
-              <div
-                className="pointer-events-none absolute -right-32 -top-28 h-80 w-80 rounded-full border border-[#d2af68]/15"
-                aria-hidden="true"
-              />
+                <button
+                  type="button"
+                  onClick={closePanel}
+                  disabled={status === "loading"}
+                  aria-label="Close popup"
+                  className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-[#F7F4EC] text-[#17241F] shadow-md transition-colors hover:bg-[#EFEBD9] disabled:opacity-50"
+                >
+                  <X size={17} aria-hidden="true" />
+                </button>
 
-              <div
-                className="pointer-events-none absolute -right-16 -top-12 h-52 w-52 rounded-full border border-[#d2af68]/10"
-                aria-hidden="true"
-              />
+                {/* TITLE */}
 
-              {/* =================================================
-                  PANEL CONTENT
-              ================================================= */}
+                <div className="mb-5 text-center">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#082F27]/70">
+                    Eco Vista Township
+                  </p>
 
-              <div className="relative z-10 flex min-h-full flex-col px-6 py-7 sm:px-9 sm:py-9">
-                {/* Header */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="mb-4 flex items-center gap-3">
-                      <span className="h-px w-8 bg-[#d2af68]" />
-
-                      <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-[#d2af68]">
-                        EcoVista Township
-                      </span>
-                    </div>
-
-                    <h2 className="font-serif text-4xl leading-[0.9] tracking-[-0.025em] sm:text-5xl">
-                      Book a
-                      <br />
-                      <span className="text-[#d2af68]">
-                        site visit.
-                      </span>
-                    </h2>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={closePanel}
-                    aria-label="Close enquiry form"
-                    className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/10 text-white/60 transition-all duration-300 hover:border-[#d2af68]/60 hover:text-[#d2af68]"
+                  <h2
+                    id="ecovista-enquiry-title"
+                    className="mt-2 font-serif text-[25px] leading-tight text-white sm:text-[27px]"
                   >
-                    <X
-                      size={19}
-                      strokeWidth={1.4}
-                      aria-hidden="true"
-                    />
-                  </button>
+                    Book your dream home
+                  </h2>
+
+                  <p className="mt-1 text-[13px] text-[#082F27]">
+                    Schedule your site visit today.
+                  </p>
                 </div>
 
-                {/* Intro */}
-                <p className="mt-7 max-w-[370px] text-[13px] leading-6 text-white/55 sm:text-sm sm:leading-7">
-                  Tell us a little about yourself and our team will
-                  get in touch to arrange your EcoVista visit.
-                </p>
+                {/* FORM */}
 
-                {/* Divider */}
-                <div className="my-7 h-px w-full bg-white/10" />
+                <form onSubmit={handleSubmit}>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      name="name"
+                      autoComplete="name"
+                      aria-label="Name"
+                      placeholder="Name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                    />
 
-                {/* =================================================
-                    FORM
-                ================================================= */}
+                    <input
+                      type="tel"
+                      name="phone"
+                      autoComplete="tel"
+                      inputMode="tel"
+                      pattern="[0-9+() -]{8,18}"
+                      aria-label="Mobile number"
+                      placeholder="Mobile No."
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                    />
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="flex flex-1 flex-col"
-                >
-                  <div className="space-y-5">
-                    {/* Name */}
-                    <div>
-                      <label
-                        htmlFor="ecovista-name"
-                        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-white/50"
-                      >
-                        Full Name
-                      </label>
-
-                      <div className="relative">
-                        <User
-                          size={16}
-                          strokeWidth={1.4}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#d2af68]/70"
-                          aria-hidden="true"
-                        />
-
-                        <input
-                          id="ecovista-name"
-                          type="text"
-                          name="name"
-                          required
-                          autoComplete="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder="Enter your full name"
-                          className="h-12 w-full border border-white/10 bg-white/[0.045] px-11 text-sm text-[#f5f0df] outline-none transition-all duration-300 placeholder:text-white/25 focus:border-[#d2af68]/70 focus:bg-white/[0.07]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label
-                        htmlFor="ecovista-email"
-                        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-white/50"
-                      >
-                        Email Address
-                      </label>
-
-                      <div className="relative">
-                        <Mail
-                          size={16}
-                          strokeWidth={1.4}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#d2af68]/70"
-                          aria-hidden="true"
-                        />
-
-                        <input
-                          id="ecovista-email"
-                          type="email"
-                          name="email"
-                          required
-                          autoComplete="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          placeholder="your@email.com"
-                          className="h-12 w-full border border-white/10 bg-white/[0.045] px-11 text-sm text-[#f5f0df] outline-none transition-all duration-300 placeholder:text-white/25 focus:border-[#d2af68]/70 focus:bg-white/[0.07]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                      <label
-                        htmlFor="ecovista-phone"
-                        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-white/50"
-                      >
-                        Phone Number
-                      </label>
-
-                      <div className="relative">
-                        <Phone
-                          size={16}
-                          strokeWidth={1.4}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-[#d2af68]/70"
-                          aria-hidden="true"
-                        />
-
-                        <input
-                          id="ecovista-phone"
-                          type="tel"
-                          name="phone"
-                          required
-                          autoComplete="tel"
-                          value={formData.phone}
-                          onChange={handleChange}
-                          placeholder="10-digit phone number"
-                          className="h-12 w-full border border-white/10 bg-white/[0.045] px-11 text-sm text-[#f5f0df] outline-none transition-all duration-300 placeholder:text-white/25 focus:border-[#d2af68]/70 focus:bg-white/[0.07]"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Message */}
-                    <div>
-                      <label
-                        htmlFor="ecovista-message"
-                        className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-white/50"
-                      >
-                        Message
-                      </label>
-
-                      <div className="relative">
-                        <MessageSquare
-                          size={16}
-                          strokeWidth={1.4}
-                          className="absolute left-4 top-4 text-[#d2af68]/70"
-                          aria-hidden="true"
-                        />
-
-                        <textarea
-                          id="ecovista-message"
-                          name="message"
-                          required
-                          rows={4}
-                          value={formData.message}
-                          onChange={handleChange}
-                          placeholder="Tell us how we can help..."
-                          className="w-full resize-none border border-white/10 bg-white/[0.045] px-11 py-3 text-sm leading-6 text-[#f5f0df] outline-none transition-all duration-300 placeholder:text-white/25 focus:border-[#d2af68]/70 focus:bg-white/[0.07]"
-                        />
-                      </div>
-                    </div>
+                    <input
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      aria-label="Email"
+                      placeholder="Email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="h-10 w-full border-0 border-b-2 border-white/85 bg-transparent px-0 text-[16px] text-white outline-none placeholder:text-white focus:border-[#082F27] sm:h-11"
+                    />
                   </div>
 
-                  {/* =================================================
-                      SUBMIT
-                  ================================================= */}
+                  {/* CONSENT */}
 
-                  <div className="mt-7">
-                    <button
-                      type="submit"
-                      disabled={status === "loading"}
-                      className="group flex h-13 w-full items-center justify-center gap-3 bg-[#d2af68] px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#102f21] transition-all duration-300 hover:bg-[#dfc17c] disabled:cursor-not-allowed disabled:opacity-50"
+                  <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-[10px] leading-[1.45] text-[#082F27] sm:text-[11px]">
+                    <input
+                      type="checkbox"
+                      checked={consent}
+                      onChange={(event) => setConsent(event.target.checked)}
+                      required
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#174C3C]"
+                    />
+
+                    <span>
+                      I authorize Eco Vista and its representatives to contact
+                      me with updates and notifications via Email, SMS, WhatsApp
+                      or Call.
+                    </span>
+                  </label>
+
+                  {/* STATUS */}
+
+                  {status === "error" && (
+                    <p
+                      role="alert"
+                      className="mt-3 text-xs font-medium text-[#7A2018]"
                     >
-                      {status === "loading"
-                        ? "Sending..."
-                        : "Request a Site Visit"}
+                      We could not submit your enquiry. Please check your
+                      details and try again.
+                    </p>
+                  )}
 
-                      {status !== "loading" && (
-                        <ArrowUpRight
-                          size={16}
-                          strokeWidth={1.6}
-                          aria-hidden="true"
-                          className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                        />
-                      )}
-                    </button>
+                  {status === "success" && (
+                    <p
+                      role="status"
+                      className="mt-3 text-center text-xs font-semibold text-[#082F27]"
+                    >
+                      Thank you. Your enquiry has been submitted.
+                    </p>
+                  )}
 
-                    {/* Success */}
-                    <AnimatePresence mode="wait">
-                      {status === "success" && (
-                        <motion.p
-                          initial={{
-                            opacity: 0,
-                            y: -8,
-                          }}
-                          animate={{
-                            opacity: 1,
-                            y: 0,
-                          }}
-                          exit={{
-                            opacity: 0,
-                          }}
-                          className="mt-4 text-center text-xs text-[#8fd6a9]"
-                        >
-                          Your enquiry has been submitted successfully.
-                        </motion.p>
-                      )}
+                  {/* SUBMIT */}
 
-                      {/* Error */}
-                      {status === "error" && (
-                        <motion.p
-                          initial={{
-                            opacity: 0,
-                            y: -8,
-                          }}
-                          animate={{
-                            opacity: 1,
-                            y: 0,
-                          }}
-                          exit={{
-                            opacity: 0,
-                          }}
-                          className="mt-4 text-center text-xs text-[#e7a0a0]"
-                        >
-                          Something went wrong. Please try again.
-                        </motion.p>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <button
+                    type="submit"
+                    disabled={status === "loading" || status === "success"}
+                    className="mx-auto mt-5 flex min-h-11 w-[155px] items-center justify-center gap-2 rounded-xl bg-[#174C3C] px-5 py-3 text-sm font-bold text-white shadow-[0_4px_0_#082F27] transition-colors hover:bg-[#082F27] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {status === "loading"
+                      ? "Submitting..."
+                      : status === "success"
+                        ? "Submitted"
+                        : "Enquire Now"}
 
-                  {/* =================================================
-                      CONTACT
-                  ================================================= */}
+                    {status !== "loading" && status !== "success" && (
+                      <ArrowUpRight size={15} aria-hidden="true" />
+                    )}
+                  </button>
 
-                  <div className="mt-auto pt-8">
-                    <div className="border-t border-white/10 pt-5">
-                      <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-white/30">
-                        Prefer to speak directly?
-                      </p>
-
-                      <a
-                        href="tel:+917488613737"
-                        className="mt-3 inline-flex items-center gap-3 text-sm text-white/70 transition-colors duration-300 hover:text-[#d2af68]"
-                      >
-                        <Phone
-                          size={15}
-                          strokeWidth={1.4}
-                          className="text-[#d2af68]"
-                          aria-hidden="true"
-                        />
-
-                        +91 74886 13737
-                      </a>
-                    </div>
-                  </div>
+                  <p className="mt-4 text-center text-[10px] text-[#082F27]/80">
+                    Prefer to call?{" "}
+                    <a
+                      href="tel:+917488613737"
+                      className="font-bold underline underline-offset-2"
+                    >
+                      +91 74886 13737
+                    </a>
+                  </p>
                 </form>
-              </div>
-            </motion.aside>
+              </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>

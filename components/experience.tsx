@@ -1,297 +1,334 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
-  ArrowDown,
   ArrowUpRight,
+  Cable,
+  Car,
+  Check,
+  Droplets,
   Dumbbell,
   Flower2,
+  Lamp,
+  Recycle,
+  ShieldCheck,
   Users,
   Baby,
+  type LucideIcon,
 } from "lucide-react";
 
-const experienceImage =
-  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2200&q=85";
-
-const gardenImage =
-  "https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=1400&q=82";
+/* ---------------------------------------------------------------
+   BRAND TOKENS (Eco Vista colour palette)
+   Primary Green   #082F27   Header / Hero
+   Secondary Green #174C3C   Sections / Cards
+   Champagne Gold  #C9A45C   Buttons / Highlights
+   Light Gold      #DFC587   Accents / Icons
+   Warm Ivory      #F7F4EC   Background
+   Warm White      #FFFFFF   Text on dark
+---------------------------------------------------------------- */
 
 const clubhouseImage =
-  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1400&q=82";
+  "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=2000&q=82";
+
+const gardenImage =
+  "https://images.unsplash.com/photo-1558904541-efa843a96f01?auto=format&fit=crop&w=2000&q=82";
+
+const playImage =
+  "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=2000&q=82";
 
 const fitnessImage =
-  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1400&q=82";
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=2000&q=82";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
-const experiences = [
+type Experience = {
+  id: string;
+  title: string;
+  description: string;
+  amenities: string[];
+  icon: LucideIcon;
+  image: string;
+  alt: string;
+};
+
+const experiences: Experience[] = [
   {
-    number: "01",
-    title: "Club House",
+    id: "clubhouse",
+    title: "Club House & Pool",
     description:
-      "A refined social space designed for gathering, unwinding and spending time together.",
+      "A refined social space for gathering, unwinding and spending time together.",
+    amenities: ["Clubhouse", "Swimming Pool"],
     icon: Users,
     image: clubhouseImage,
+    alt: "Club house with an inviting social space",
   },
   {
-    number: "02",
-    title: "Garden & Paths",
+    id: "parks",
+    title: "Parks & Pathways",
     description:
-      "Thoughtfully landscaped surroundings where greenery becomes part of everyday life.",
+      "Landscaped parks and wide internal roads, with more than 25% of the township kept green and open.",
+    amenities: ["Landscaped Parks", "Wide Internal Roads"],
     icon: Flower2,
     image: gardenImage,
+    alt: "Landscaped garden pathway",
   },
   {
-    number: "03",
+    id: "play",
     title: "Play & Family",
     description:
-      "Spaces created for children to explore, play and grow within a connected community.",
+      "Spaces for children to explore, play and grow within a connected community.",
+    amenities: ["Kids Play Area"],
     icon: Baby,
-    image: experienceImage,
+    image: playImage,
+    alt: "Family-friendly living space",
   },
   {
-    number: "04",
+    id: "fitness",
     title: "Fitness",
     description:
-      "A dedicated environment to keep movement, health and wellbeing close to home.",
+      "A dedicated open-air space to keep movement and wellbeing close to home.",
+    amenities: ["Open Gym"],
     icon: Dumbbell,
     image: fitnessImage,
+    alt: "Fitness and open gym area",
   },
 ];
 
+const essentials: { label: string; Icon: LucideIcon }[] = [
+  { label: "24×7 Security", Icon: ShieldCheck },
+  { label: "Water Supply", Icon: Droplets },
+  { label: "Sewage Treatment Plant", Icon: Recycle },
+  { label: "Underground Utilities", Icon: Cable },
+  { label: "Street Lighting", Icon: Lamp },
+  { label: "Ample Parking", Icon: Car },
+];
+
 export default function Experience() {
+  const [active, setActive] = useState(0);
+  const reduce = useReducedMotion();
+
+  const reveal = (delay = 0) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 28 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, amount: 0.2 },
+          transition: { duration: 0.85, delay, ease },
+        };
+
+  const current = experiences[active];
+
   return (
     <section
       id="experience"
-      className="relative overflow-hidden bg-[#0c2d20] text-[#f5f0df]"
+      aria-labelledby="experience-heading"
+      className="relative overflow-hidden bg-[#082F27] text-white"
     >
-      {/* =========================================================
-          BACKGROUND DETAILS
-      ========================================================= */}
-
+      {/* Background rings */}
       <div
-        className="pointer-events-none absolute right-[-180px] top-[120px] h-[500px] w-[500px] rounded-full border border-[#d2af68]/10"
         aria-hidden="true"
+        className="pointer-events-none absolute -right-44 top-24 h-[500px] w-[500px] rounded-full border border-[#DFC587]/10"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-28 top-40 h-[380px] w-[380px] rounded-full border border-[#DFC587]/10"
       />
 
-      <div
-        className="pointer-events-none absolute right-[-120px] top-[180px] h-[380px] w-[380px] rounded-full border border-[#d2af68]/10"
-        aria-hidden="true"
-      />
-
-      {/* =========================================================
-          INTRO
-      ========================================================= */}
-
-      <div className="mx-auto max-w-[1440px] px-6 pb-14 pt-24 sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 lg:pb-24 lg:pt-36">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease }}
-          className="flex items-center justify-between"
-        >
+      <div className="relative mx-auto max-w-[1360px] px-6 py-24 sm:px-10 sm:py-28 lg:px-16 lg:py-32">
+        {/* =====================================================
+            INTRO
+        ===================================================== */}
+        <motion.div {...reveal(0)}>
           <div className="flex items-center gap-4">
-            <span className="h-px w-10 bg-[#d2af68] sm:w-14" />
-
-            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d2af68] sm:text-[11px]">
-              The EcoVista Experience
+            <span className="h-px w-12 bg-[#C9A45C]" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#DFC587] sm:text-xs">
+              The Eco Vista Experience
             </span>
           </div>
 
-          <span className="font-serif text-5xl leading-none text-white/10 sm:text-6xl lg:text-7xl">
-            02
-          </span>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:gap-16">
+            <h2
+              id="experience-heading"
+              className="font-serif text-[clamp(2.8rem,6vw,5.6rem)] font-medium leading-[1] tracking-[-0.035em]"
+            >
+              Life, shaped
+              <span className="block text-[#C9A45C]">around you.</span>
+            </h2>
+
+            <p className="max-w-[460px] border-l border-[#C9A45C]/60 pl-5 text-[15px] leading-8 text-white/70 sm:text-base">
+              From quiet green spaces to places to gather, play and stay
+              active, Eco Vista is envisioned as an environment where every
+              part of everyday life has its place.
+            </p>
+          </div>
         </motion.div>
 
-        {/* =======================================================
-            HEADING
-        ======================================================= */}
-
-        <div className="mt-12 grid gap-10 lg:grid-cols-[1.25fr_0.55fr] lg:items-end lg:gap-16">
-          <motion.h2
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{
-              duration: 1,
-              ease,
-            }}
-            className="max-w-[1000px] font-serif text-[clamp(3.7rem,8vw,8.5rem)] font-medium leading-[0.8] tracking-[-0.045em]"
-          >
-            Life, shaped
-            <br />
-            around <span className="text-[#d2af68]">you.</span>
-          </motion.h2>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.15,
-              ease,
-            }}
-            className="lg:pb-2"
-          >
-            <p className="border-l border-[#d2af68]/60 pl-5 text-[14px] leading-7 text-white/55 sm:text-[15px] sm:leading-8">
-              From quiet green spaces to places to gather, play and stay active
-              — EcoVista is envisioned as an environment where every part of
-              everyday life has its place.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* =========================================================
-          FEATURE IMAGE
-      ========================================================= */}
-
-      <div className="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
+        {/* =====================================================
+            INTERACTIVE SHOWCASE
+        ===================================================== */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.15 }}
-          transition={{
-            duration: 1,
-            ease,
-          }}
-          className="group relative h-[440px] overflow-hidden sm:h-[570px] lg:h-[640px]"
+          {...reveal(0.05)}
+          className="mt-14 grid gap-6 sm:mt-16 lg:grid-cols-[1.3fr_0.7fr] lg:gap-8"
         >
-          <Image
-            src={experienceImage}
-            alt="Contemporary living surrounded by greenery"
-            fill
-            loading="lazy"
-            quality={82}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 92vw"
-            className="object-cover object-center transition-transform duration-[1800ms] ease-out group-hover:scale-[1.035]"
-          />
+          {/* ---------- Image stage ---------- */}
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[24px] shadow-[0_40px_90px_-35px_rgba(0,0,0,0.8)] lg:aspect-auto lg:min-h-[600px]">
+            {experiences.map((item, i) => (
+              <Image
+                key={item.id}
+                src={item.image}
+                alt={item.alt}
+                fill
+                quality={80}
+                sizes="(max-width: 1024px) 100vw, 56vw"
+                className={`object-cover object-center transition-opacity duration-700 ease-out ${
+                  i === active ? "opacity-100" : "opacity-0"
+                }`}
+                aria-hidden={i !== active}
+              />
+            ))}
 
-          {/* Cinematic overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#061c12]/90 via-[#061c12]/10 to-transparent" />
+            {/* Green wash for the caption */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#082F27]/90 via-[#082F27]/10 to-transparent" />
 
-          {/* Top label */}
-          <div className="absolute left-6 top-6 sm:left-9 sm:top-9 lg:left-10 lg:top-10">
-            <div className="flex items-center gap-3">
-              <span className="h-px w-9 bg-[#d2af68] sm:w-12" />
+            {/* Caption */}
+            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-9">
+              <div className="flex items-center gap-3">
+                <span className="h-px w-9 bg-[#DFC587]" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#DFC587]">
+                  Designed for everyday living
+                </span>
+              </div>
 
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">
-                Designed for everyday living
-              </span>
+              <p className="mt-4 max-w-[520px] font-serif text-3xl leading-[1.05] tracking-[-0.02em] text-white sm:text-4xl lg:text-[2.8rem]">
+                Where the everyday feels a little more alive.
+              </p>
             </div>
           </div>
 
-          {/* Bottom statement */}
-          <div className="absolute bottom-7 left-6 max-w-[600px] sm:bottom-10 sm:left-9 lg:bottom-12 lg:left-10">
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: 0.7,
-                delay: 0.25,
-                ease,
-              }}
-              className="font-serif text-3xl leading-[0.95] tracking-[-0.02em] text-[#f5f0df] sm:text-4xl lg:text-5xl"
+          {/* ---------- Selector list ---------- */}
+          <ul className="flex flex-col gap-3" aria-label="Lifestyle experiences">
+            {experiences.map((item, i) => {
+              const isActive = i === active;
+              const Icon = item.icon;
+
+              return (
+                <li key={item.id} className="flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    aria-pressed={isActive}
+                    className={`group flex h-full w-full flex-col rounded-2xl border p-5 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#DFC587] sm:p-6 ${
+                      isActive
+                        ? "border-[#C9A45C]/70 bg-[#174C3C]"
+                        : "border-white/10 bg-[#082F27] hover:border-[#C9A45C]/40 hover:bg-[#174C3C]/40"
+                    }`}
+                  >
+                    <span className="flex items-center gap-4">
+                      <span
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition-colors duration-300 ${
+                          isActive
+                            ? "border-[#C9A45C] bg-[#C9A45C] text-[#082F27]"
+                            : "border-[#C9A45C]/50 text-[#DFC587]"
+                        }`}
+                      >
+                        <Icon size={19} strokeWidth={1.5} aria-hidden="true" />
+                      </span>
+
+                      <span className="font-serif text-xl tracking-[-0.01em] text-white sm:text-2xl">
+                        {item.title}
+                      </span>
+                    </span>
+
+                    {/* Expanded details */}
+                    <span
+                      className={`grid transition-all duration-500 ease-out ${
+                        isActive
+                          ? "mt-4 grid-rows-[1fr] opacity-100"
+                          : "grid-rows-[0fr] opacity-0"
+                      }`}
+                    >
+                      <span className="overflow-hidden">
+                        <span className="block text-sm leading-7 text-white/70">
+                          {item.description}
+                        </span>
+
+                        <span className="mt-4 flex flex-wrap gap-2">
+                          {item.amenities.map((amenity) => (
+                            <span
+                              key={amenity}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-[#DFC587]/30 px-3 py-1.5 text-[11px] font-medium text-[#F7F4EC]"
+                            >
+                              <Check
+                                size={12}
+                                strokeWidth={2}
+                                aria-hidden="true"
+                                className="text-[#DFC587]"
+                              />
+                              {amenity}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </motion.div>
+
+        {/* Screen-reader announcement of the active experience */}
+        <p className="sr-only" aria-live="polite">
+          Showing {current.title}
+        </p>
+
+        {/* =====================================================
+            ESSENTIALS
+        ===================================================== */}
+        <motion.div
+          {...reveal(0.05)}
+          className="mt-20 overflow-hidden rounded-[24px] border border-[#DFC587]/20 bg-[#174C3C]/40 sm:mt-24"
+        >
+          <div className="flex flex-col gap-4 border-b border-[#DFC587]/15 px-6 py-7 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+            <p className="font-serif text-2xl leading-tight tracking-[-0.01em] sm:text-3xl">
+              Built for comfort,
+              <span className="text-[#DFC587]"> behind the scenes too.</span>
+            </p>
+
+            <Link
+              href="#amenities"
+              className="group inline-flex items-center gap-2 self-start text-[11px] font-bold uppercase tracking-[0.2em] text-[#DFC587] transition-colors duration-300 hover:text-white sm:self-auto"
             >
-              Where the everyday
-              <br />
-              feels a little more <span className="text-[#d2af68]">alive.</span>
-            </motion.p>
+              View all amenities
+              <ArrowUpRight
+                size={15}
+                strokeWidth={1.6}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </Link>
           </div>
 
-          {/* Number */}
-          <span className="absolute right-6 top-5 font-serif text-7xl leading-none text-white/15 sm:right-9 sm:top-7 sm:text-8xl lg:right-10 lg:top-8 lg:text-9xl">
-            02
-          </span>
-        </motion.div>
-      </div>
-
-      {/* =========================================================
-          EXPERIENCE GRID
-      ========================================================= */}
-
-      <div className="mx-auto max-w-[1440px] px-6 pb-24 pt-16 sm:px-10 sm:pb-28 sm:pt-20 lg:px-16 lg:pb-36 lg:pt-24">
-        <div className="grid gap-px overflow-hidden border border-white/10 bg-white/10 md:grid-cols-2 lg:grid-cols-4">
-          {experiences.map((item, index) => {
-            const Icon = item.icon;
-
-            return (
-              <motion.article
-                key={item.number}
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{
-                  duration: 0.7,
-                  delay: index * 0.08,
-                  ease,
-                }}
-                className="group relative overflow-hidden bg-[#0c2d20]"
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            {essentials.map(({ label, Icon }) => (
+              <li
+                key={label}
+                className="flex flex-col items-center gap-3 border-b border-r border-white/10 px-4 py-8 text-center [&:nth-child(2n)]:border-r-0 sm:[&:nth-child(2n)]:border-r sm:[&:nth-child(3n)]:border-r-0 lg:[&:nth-child(3n)]:border-r lg:[&:nth-child(6n)]:border-r-0 lg:border-b-0"
               >
-                {/* Image */}
-                <div className="relative h-[270px] overflow-hidden sm:h-[300px] lg:h-[330px]">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    loading="lazy"
-                    quality={78}
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.06]"
-                  />
-
-                  <div className="absolute inset-0 bg-[#071c13]/25 transition-colors duration-500 group-hover:bg-[#071c13]/10" />
-
-                  {/* Number */}
-                  <span className="absolute left-5 top-5 font-serif text-2xl text-white/75">
-                    {item.number}
-                  </span>
-
-                  {/* Icon */}
-                  <div className="absolute bottom-5 right-5 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/10 backdrop-blur-sm transition-colors duration-300 group-hover:border-[#d2af68]">
-                    <Icon
-                      size={17}
-                      strokeWidth={1.4}
-                      className="text-white"
-                      aria-hidden="true"
-                    />
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="relative px-6 py-6 sm:px-7 sm:py-7">
-                  <h3 className="font-serif text-2xl tracking-[-0.02em] text-[#f5f0df] sm:text-[1.7rem]">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-3 text-[12px] leading-6 text-white/45 sm:text-[13px]">
-                    {item.description}
-                  </p>
-
-                  <div className="mt-6 h-px w-full bg-white/10" />
-
-                  <Link
-                    href="#amenities"
-                    className="group/link mt-5 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-[#d2af68]"
-                  >
-                    Explore
-                    <ArrowUpRight
-                      size={13}
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                      className="transition-transform duration-300 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"
-                    />
-                  </Link>
-                </div>
-              </motion.article>
-            );
-          })}
-        </div>
+                <span className="flex h-12 w-12 items-center justify-center rounded-full border border-[#C9A45C]/50 text-[#DFC587]">
+                  <Icon size={21} strokeWidth={1.4} aria-hidden="true" />
+                </span>
+                <span className="text-xs font-medium leading-snug text-[#F7F4EC]/90 sm:text-[13px]">
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
       </div>
     </section>
   );

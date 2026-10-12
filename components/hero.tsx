@@ -2,220 +2,221 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  ArrowDown,
+  ArrowRight,
+  Building2,
+  MapPin,
+  Trees,
+  type LucideIcon,
+} from "lucide-react";
+
+/* ---------------------------------------------------------------
+   BRAND TOKENS (Eco Vista colour palette)
+   Primary Green   #082F27   Header / Hero
+   Secondary Green #174C3C   Sections / Cards
+   Champagne Gold  #C9A45C   Buttons / Highlights
+   Light Gold      #DFC587   Accents / Icons
+   Warm Ivory      #F7F4EC   Background
+   Warm White      #FFFFFF   Text on dark
+---------------------------------------------------------------- */
 
 const heroImage =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=85";
 
+const ease = [0.22, 1, 0.36, 1] as const;
+
+const facts: { label: string; value: string; Icon: LucideIcon }[] = [
+  { label: "Total land", value: "30 Acres", Icon: Trees },
+  { label: "Location", value: "Dhanbad, Jharkhand", Icon: MapPin },
+  { label: "Offering", value: "Plots & Simplex Homes", Icon: Building2 },
+];
+
 export default function Hero() {
+  const reduce = useReducedMotion();
+
+  // One orchestrated page-load sequence (skipped for reduced motion)
+  const enter = (delay: number, y = 28) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.9, delay, ease },
+        };
+
   return (
     <section
       id="home"
-      className="relative min-h-[100svh] overflow-hidden bg-[#0c2d20]"
+      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#082F27]"
     >
       {/* =====================================================
-          HERO IMAGE
+          FULL-BLEED IMAGE (slow settle on load)
       ===================================================== */}
-
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        {...(reduce
+          ? {}
+          : {
+              initial: { scale: 1.1 },
+              animate: { scale: 1 },
+              transition: { duration: 2.8, ease },
+            })}
+      >
         <Image
           src={heroImage}
-          alt="Modern home surrounded by greenery"
+          alt="Modern Eco Vista home surrounded by landscaped greenery at dusk"
           fill
           priority
           quality={85}
           sizes="100vw"
           className="object-cover object-center"
         />
-      </div>
+      </motion.div>
 
       {/* =====================================================
-          IMAGE OVERLAYS
+          OVERLAYS
       ===================================================== */}
 
-      {/* Left-side readability */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#071c13]/90 via-[#071c13]/55 to-[#071c13]/15" />
+      {/* Bottom-up green wash: carries the headline */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#082F27] via-[#082F27]/60 to-[#082F27]/10" />
 
-      {/* Bottom cinematic fade */}
-      <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-[#071c13]/95 via-[#071c13]/40 to-transparent" />
+      {/* Left-side wash for readability, image stays vivid on the right */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#082F27]/80 via-[#082F27]/30 to-transparent" />
 
-      {/* Subtle overall tint */}
-      <div className="absolute inset-0 bg-[#0b3323]/10 mix-blend-multiply" />
+      {/* Top wash: keeps the transparent navbar legible */}
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#082F27]/75 to-transparent" />
 
       {/* =====================================================
           CONTENT
       ===================================================== */}
+      <div className="relative z-10 mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-end px-6 pb-12 pt-40 sm:px-10 sm:pb-14 lg:px-16 lg:pb-16">
+        <div className="grid items-end gap-12 lg:grid-cols-[1.35fr_0.65fr] lg:gap-16">
+          {/* ---------- TEXT ---------- */}
+          <div>
+            <motion.div {...enter(0.2, 16)} className="flex items-center gap-4">
+              <span className="h-px w-10 bg-[#C9A45C] sm:w-14" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-[#DFC587] sm:text-xs">
+                Eco Vista Township
+              </span>
+            </motion.div>
 
-      <div className="relative z-10 mx-auto flex min-h-[100svh] max-w-[1440px] flex-col justify-end px-6 pb-10 pt-32 sm:px-10 sm:pb-14 lg:px-16 lg:pb-16">
-        <div className="max-w-[900px]">
-          {/* =================================================
-              EYEBROW
-          ================================================= */}
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.2,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="mb-5 flex items-center gap-4"
-          >
-            <span className="h-px w-10 bg-[#c9a45c] sm:w-14" />
-
-            <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[#dfc17c] sm:text-[11px]">
-              EcoVista Township
-            </span>
-          </motion.div>
-
-          {/* =================================================
-              MAIN HEADING
-          ================================================= */}
-
-          <motion.h1
-            initial={{ opacity: 0, y: 45 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 1,
-              delay: 0.3,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="font-serif text-[clamp(3.5rem,8vw,7.5rem)] font-medium leading-[0.85] tracking-[-0.035em] text-[#f5f0df]"
-          >
-            A greener way
-            <br />
-            <span className="text-[#dfc17c]">to come home.</span>
-          </motion.h1>
-
-          {/* =================================================
-              DESCRIPTION
-          ================================================= */}
-
-          <motion.p
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.6,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="mt-7 max-w-[520px] text-sm font-medium leading-7 text-white/80 sm:text-base"
-          >
-            More than a piece of land. A place thoughtfully shaped around
-            nature, community and beautiful living.
-          </motion.p>
-
-          {/* =================================================
-              CTA BUTTONS
-          ================================================= */}
-
-          <motion.div
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.75,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="mt-8 flex flex-col gap-3 sm:flex-row"
-          >
-            <Link
-              href="#contact"
-              className="group inline-flex items-center justify-center gap-3 bg-[#c9a45c] px-7 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#102f21] shadow-[0_5px_20px_rgba(0,0,0,0.15)] transition-colors duration-300 hover:bg-[#dfc17c]"
+            <motion.h1
+              {...enter(0.3, 50)}
+              className="mt-6 font-serif text-[clamp(3.4rem,8.4vw,8rem)] font-medium leading-[0.94] tracking-[-0.04em] text-white"
             >
-              Book a Site Visit
+              A greener way
+              <span className="block text-[#DFC587]">to come home.</span>
+            </motion.h1>
 
-              <ArrowUpRight
-                size={16}
-                strokeWidth={1.7}
-                aria-hidden="true"
-                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
-
-            <Link
-              href="#about"
-              className="group inline-flex items-center justify-center gap-3 border border-white/35 bg-black/10 px-7 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white backdrop-blur-[2px] transition-all duration-300 hover:border-white/60 hover:bg-black/20"
+            <motion.p
+              {...enter(0.55)}
+              className="mt-7 max-w-[480px] text-base leading-8 text-white/85 sm:text-lg"
             >
-              Discover EcoVista
+              More than a piece of land. A place thoughtfully shaped around
+              nature, community and beautiful living.
+            </motion.p>
 
-              <ArrowUpRight
-                size={16}
-                strokeWidth={1.7}
-                aria-hidden="true"
-                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
-          </motion.div>
-        </div>
+            <motion.div
+              {...enter(0.7)}
+              className="mt-9 flex flex-col gap-4 sm:flex-row"
+            >
+              <Link
+                href="#contact"
+                className="group inline-flex items-center justify-center gap-3 bg-[#C9A45C] px-8 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-[#082F27] transition-colors duration-300 hover:bg-[#DFC587] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#DFC587]"
+              >
+                Book a Site Visit
+                <ArrowRight
+                  size={16}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
 
-        {/* =====================================================
-            BOTTOM BAR
-        ===================================================== */}
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            duration: 0.8,
-            delay: 1.1,
-          }}
-          className="mt-10 flex items-center justify-between border-t border-white/15 pt-5"
-        >
-          {/* Desktop information */}
-          <div className="hidden items-center gap-8 sm:flex">
-            <div>
-              <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/50">
-                Designed around
-              </p>
-
-              <p className="mt-1 text-xs font-medium text-white/80">
-                Nature & Community
-              </p>
-            </div>
-
-            <div className="h-7 w-px bg-white/20" />
-
-            <div>
-              <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/50">
-                A place to
-              </p>
-
-              <p className="mt-1 text-xs font-medium text-white/80">
-                Live • Grow • Belong
-              </p>
-            </div>
+              <Link
+                href="#about"
+                className="group inline-flex items-center justify-center gap-3 border border-white/50 px-8 py-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:border-[#DFC587] hover:text-[#DFC587] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#DFC587]"
+              >
+                Discover Eco Vista
+                <ArrowRight
+                  size={16}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+            </motion.div>
           </div>
 
-          {/* Discover */}
+          {/* ---------- GLASS FACTS CARD ---------- */}
+          <motion.aside
+            {...enter(0.9, 40)}
+            aria-label="Eco Vista at a glance"
+            className="w-full lg:ml-auto lg:max-w-[380px]"
+          >
+            <div className="overflow-hidden rounded-2xl border border-[#DFC587]/25 bg-[#082F27]/55 shadow-[0_30px_70px_-25px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+              <p className="border-b border-[#DFC587]/20 px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.26em] text-[#DFC587]">
+                At a glance
+              </p>
+
+              <ul className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1">
+                {facts.map(({ label, value, Icon }, i) => (
+                  <li
+                    key={label}
+                    className={`flex items-center gap-4 px-6 py-5 ${
+                      i > 0
+                        ? "border-t border-white/10 sm:border-l sm:border-t-0 lg:border-l-0 lg:border-t"
+                        : ""
+                    }`}
+                  >
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C9A45C]/50 text-[#DFC587]">
+                      <Icon size={19} strokeWidth={1.4} aria-hidden="true" />
+                    </span>
+
+                    <span>
+                      <span className="block text-[10px] font-medium uppercase tracking-[0.2em] text-white/55">
+                        {label}
+                      </span>
+                      <span className="mt-1 block font-serif text-lg leading-tight text-white">
+                        {value}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.aside>
+        </div>
+
+        {/* ---------- SCROLL CUE ---------- */}
+        <motion.div
+          {...(reduce
+            ? {}
+            : {
+                initial: { opacity: 0 },
+                animate: { opacity: 1 },
+                transition: { duration: 0.8, delay: 1.3 },
+              })}
+          className="mt-12 hidden items-center gap-4 border-t border-white/15 pt-5 lg:flex"
+        >
           <Link
             href="#about"
-            aria-label="Discover EcoVista"
-            className="group ml-auto flex items-center gap-3 text-white/75 transition-colors duration-300 hover:text-white sm:ml-0"
+            aria-label="Scroll to the overview"
+            className="group flex items-center gap-3 text-white/70 transition-colors duration-300 hover:text-white"
           >
-            <span className="text-[9px] font-semibold uppercase tracking-[0.25em]">
-              Discover
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 transition-colors duration-300 group-hover:border-[#C9A45C]">
+              <ArrowDown size={14} strokeWidth={1.5} aria-hidden="true" />
             </span>
-
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/25 transition-colors duration-300 group-hover:border-[#c9a45c]">
-              <motion.span
-                animate={{ y: [0, 4, 0] }}
-                transition={{
-                  duration: 1.6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <ArrowDown
-                  size={14}
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-              </motion.span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.25em]">
+              Scroll to explore
             </span>
           </Link>
+
+          <span className="ml-auto text-[10px] font-medium uppercase tracking-[0.25em] text-white/50">
+            Where land becomes legacy
+          </span>
         </motion.div>
       </div>
     </section>

@@ -1,364 +1,229 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  Home,
+  Leaf,
+  MapPinned,
+  Route,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 
-const aboutImage =
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2200&q=85";
+/* ---------------------------------------------------------------
+   BRAND TOKENS (Eco Vista colour palette)
+   Primary Green   #082F27   Header / Hero / dark panels
+   Secondary Green #174C3C   Sections / Cards
+   Champagne Gold  #C9A45C   Buttons / Highlights
+   Light Gold      #DFC587   Accents / Icons
+   Warm Ivory      #F7F4EC   Background
+   Soft Cream      #EFEBD9   Section background
+   Charcoal Green  #17241F   Headings / Text
+   Warm White      #FFFFFF   Text on dark
+---------------------------------------------------------------- */
+
+// Place the file at /public/images/ecovista-entrance.jpg
+const overviewImage = "/images/ecovista-entrance.jpg";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+const pillars: { label: string; Icon: LucideIcon }[] = [
+  { label: "Premium Plots", Icon: MapPinned },
+  { label: "Simplex Homes", Icon: Home },
+  { label: "Green Living", Icon: Leaf },
+  { label: "Modern Infrastructure", Icon: Route },
+  { label: "Gated Community", Icon: ShieldCheck },
+];
+
 export default function About() {
+  const reduce = useReducedMotion();
+
+  // One orchestrated reveal for the whole section (disabled for reduced motion)
+  const reveal = (delay = 0) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 28 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, amount: 0.25 },
+          transition: { duration: 0.85, delay, ease },
+        };
+
   return (
     <section
       id="about"
-      className="relative overflow-hidden bg-[#f4efdf] text-[#123d2b]"
+      aria-labelledby="overview-heading"
+      className="relative overflow-hidden bg-white text-[#17241F]"
     >
-      {/* =========================================================
-          INTRO
-      ========================================================= */}
+      {/* Soft cream wash behind the lower half */}
+      {/* <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-[#EFEBD9]"
+      /> */}
 
-      <div className="mx-auto max-w-[1440px] px-6 pb-16 pt-24 sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 lg:pb-24 lg:pt-32">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.7, ease }}
-          className="flex items-center justify-between"
-        >
-          <div className="flex items-center gap-4">
-            <span className="h-px w-10 bg-[#c9a45c] sm:w-14" />
+      {/* Decorative leaf, top-left (brand motif) */}
+      <Leaf
+        aria-hidden="true"
+        strokeWidth={0.6}
+        className="pointer-events-none absolute -left-10 top-10 h-56 w-56 -rotate-[25deg] text-[#174C3C]/[0.06] sm:h-72 sm:w-72"
+      />
 
-            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#8c7138] sm:text-xs">
-              About EcoVista
-            </span>
+      <div className="relative mx-auto max-w-[1420px] px-5 pb-20 pt-24 sm:px-8 sm:pb-24 sm:pt-28 lg:px-12 lg:pb-28 lg:pt-32">
+        {/* =====================================================
+            OVERVIEW: TEXT + IMAGE
+        ===================================================== */}
+        <div className="grid items-center gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12 xl:gap-16">
+          {/* ---------- Text column ---------- */}
+          <div>
+            <motion.div {...reveal(0)} className="flex items-center gap-4">
+              <span className="h-px w-12 bg-[#C9A45C]" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-[#8c7138] sm:text-xs">
+                About / Overview
+              </span>
+            </motion.div>
+
+            <motion.h2
+              id="overview-heading"
+              {...reveal(0.08)}
+              className="mt-7 font-serif text-[clamp(2.2rem,3.6vw,3.6rem)] font-medium leading-[1.04] tracking-[-0.03em] text-[#17241F]"
+            >
+              A Thoughtfully Planned
+              <span className="block text-[#B38E3F]">
+                Address for a Better Tomorrow
+              </span>
+            </motion.h2>
+
+            <motion.div
+              {...reveal(0.16)}
+              className="mt-8 max-w-[560px] space-y-5 text-[15px] leading-[1.85] text-[#17241F]/75 sm:text-base"
+            >
+              <p>
+                Eco Vista Township is a thoughtfully envisioned{" "}
+                <strong className="font-semibold text-[#082F27]">
+                  30-acre premium residential development
+                </strong>{" "}
+                in Dhanbad, Jharkhand, bringing together premium residential
+                plots and contemporary simplex homes within a secure,
+                well-planned gated community.
+              </p>
+
+              <p>
+                Designed for modern living, Eco Vista combines the freedom to
+                own your land and create your dream home with landscaped green
+                spaces, wide internal roads, modern infrastructure, security and
+                thoughtfully planned lifestyle amenities.
+              </p>
+
+              <p>
+                Here, nature, comfort and contemporary living come together to
+                create an address designed for today and built with lasting
+                value for generations.
+              </p>
+            </motion.div>
           </div>
 
-          <span className="font-serif text-5xl leading-none text-[#123d2b]/10 sm:text-6xl lg:text-7xl">
-            01
-          </span>
-        </motion.div>
-
-        {/* =======================================================
-            HEADING + DESCRIPTION
-        ======================================================= */}
-
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-end lg:gap-16">
-          {/* Heading */}
-          <motion.h2
-            initial={{ opacity: 0, y: 55 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{
-              duration: 0.95,
-              ease,
-            }}
-            className="font-serif text-[clamp(3.8rem,8vw,8.5rem)] font-medium leading-[0.8] tracking-[-0.045em]"
-          >
-            More than a
-            <br />
-            piece of <span className="text-[#a48345]">land.</span>
-          </motion.h2>
-
-          {/* Description */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{
-              duration: 0.8,
-              delay: 0.15,
-              ease,
-            }}
-            className="lg:pb-1"
-          >
-            <div className="mb-4 flex items-center gap-3">
-              <span className="h-px w-8 bg-[#c9a45c]" />
-
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#8c7138]">
-                A place called home
-              </span>
-            </div>
-
-            <p className="max-w-[430px] text-[15px] leading-7 text-[#123d2b]/65 sm:text-base sm:leading-8">
-              At EcoVista Township, we believe a home is more than just a
-              piece of land. It is a place thoughtfully shaped around nature,
-              community and beautiful living.
-            </p>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* =========================================================
-          MAIN IMAGE COMPOSITION
-      ========================================================= */}
-
-      <div className="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-16">
-        <div className="relative">
-          {/* =====================================================
-              IMAGE
-          ===================================================== */}
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{
-              duration: 1,
-              ease,
-            }}
-            className="group relative h-[470px] overflow-hidden sm:h-[590px] lg:h-[650px]"
-          >
-            <Image
-              src={aboutImage}
-              alt="Lush green landscape representing the EcoVista vision"
-              fill
-              loading="lazy"
-              quality={82}
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 92vw"
-              className="object-cover object-center transition-transform duration-[1600ms] ease-out group-hover:scale-[1.035]"
+          {/* ---------- Image column ---------- */}
+          <motion.div {...reveal(0.12)} className="relative">
+            {/* Offset gold frame */}
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-4 -right-4 hidden h-full w-full rounded-[28px] border border-[#C9A45C]/60 sm:block"
             />
 
-            {/* Dark cinematic overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#071c13]/75 via-[#071c13]/5 to-transparent" />
-
-            {/* Left caption */}
-            <div className="absolute bottom-7 left-6 sm:bottom-9 sm:left-9 lg:bottom-10 lg:left-10">
-              <div className="flex items-center gap-3">
-                <span className="h-px w-9 bg-[#d2af68] sm:w-12" />
-
-                <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white sm:text-[11px]">
-                  Nature meets beautiful life
-                </span>
-              </div>
-            </div>
-
-            {/* Image number */}
-            <div className="absolute right-6 top-5 sm:right-9 sm:top-7 lg:right-10 lg:top-8">
-              <span className="font-serif text-7xl leading-none text-white/15 sm:text-8xl lg:text-9xl">
-                01
-              </span>
-            </div>
-          </motion.div>
-
-          {/* =====================================================
-              FLOATING INFORMATION PANEL
-          ===================================================== */}
-
-          <motion.div
-            initial={{ opacity: 0, y: 55 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{
-              duration: 0.85,
-              delay: 0.15,
-              ease,
-            }}
-            className="relative mx-4 -mt-20 sm:mx-8 sm:-mt-24 lg:absolute lg:bottom-[-45px] lg:right-8 lg:mx-0 lg:mt-0 lg:w-[445px]"
-          >
-            <div className="relative overflow-hidden bg-[#123d2b] px-7 py-8 shadow-[0_25px_65px_rgba(0,0,0,0.2)] sm:px-9 sm:py-10 lg:px-11 lg:py-11">
-              {/* Decorative circles */}
-              <div
-                className="pointer-events-none absolute -right-28 -top-28 h-80 w-80 rounded-full border border-[#d2af68]/20"
-                aria-hidden="true"
+            <div className="group relative aspect-[1864/1084] w-full overflow-hidden rounded-[28px] shadow-[0_30px_70px_-20px_rgba(8,47,39,0.45)]">
+              <Image
+                src={overviewImage}
+                alt="Eco Vista Township entrance surrounded by landscaped greenery"
+                fill
+                sizes="(max-width: 1024px) 100vw, 52vw"
+                quality={82}
+                className="object-cover object-center transition-transform duration-[1600ms] ease-out group-hover:scale-[1.04]"
               />
 
-              <div
-                className="pointer-events-none absolute -right-14 -top-14 h-52 w-52 rounded-full border border-[#d2af68]/15"
-                aria-hidden="true"
-              />
+              {/* Light green gradient so the caption stays readable */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#082F27]/55 via-transparent to-transparent" />
 
-              {/* Content */}
-              <div className="relative z-10">
-                {/* Eyebrow */}
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.27em] text-[#d2af68]">
-                    The EcoVista philosophy
+              {/* Location tag */}
+              <div className="absolute bottom-6 left-6 sm:bottom-8 sm:left-8">
+                <div className="flex items-center gap-3">
+                  <span className="h-px w-9 bg-[#DFC587]" />
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
+                    Dhanbad, Jharkhand
                   </span>
-
-                  <span className="font-serif text-2xl text-[#d2af68]/60">
-                    01
-                  </span>
-                </div>
-
-                {/* Heading */}
-                <h3 className="max-w-[360px] font-serif text-[2.35rem] leading-[0.95] tracking-[-0.025em] text-[#f5f0df] sm:text-[2.8rem]">
-                  Invest in your own piece of earth.
-                </h3>
-
-                {/* Divider */}
-                <div className="my-7 h-px w-full bg-white/10" />
-
-                {/* Philosophy */}
-                <div className="grid gap-5 sm:grid-cols-3 sm:gap-4">
-                  {/* Nature */}
-                  <div>
-                    <span className="font-serif text-xl text-[#d2af68]">
-                      01
-                    </span>
-
-                    <h4 className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#f5f0df]">
-                      Nature
-                    </h4>
-
-                    <p className="mt-2 text-[11px] leading-5 text-white/50">
-                      A setting shaped around greenery.
-                    </p>
-                  </div>
-
-                  {/* Community */}
-                  <div>
-                    <span className="font-serif text-xl text-[#d2af68]">
-                      02
-                    </span>
-
-                    <h4 className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#f5f0df]">
-                      Community
-                    </h4>
-
-                    <p className="mt-2 text-[11px] leading-5 text-white/50">
-                      Spaces created for connection.
-                    </p>
-                  </div>
-
-                  {/* Tomorrow */}
-                  <div>
-                    <span className="font-serif text-xl text-[#d2af68]">
-                      03
-                    </span>
-
-                    <h4 className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-[#f5f0df]">
-                      Tomorrow
-                    </h4>
-
-                    <p className="mt-2 text-[11px] leading-5 text-white/50">
-                      A vision for thoughtful living.
-                    </p>
-                  </div>
-                </div>
-
-                {/* CTA */}
-                <div className="mt-8">
-                  <Link
-                    href="#experience"
-                    className="group inline-flex items-center gap-3 border-b border-[#d2af68]/50 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f5f0df] transition-colors duration-300 hover:border-[#d2af68] hover:text-[#d2af68]"
-                  >
-                    Discover the experience
-
-                    <ArrowUpRight
-                      size={15}
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                      className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                    />
-                  </Link>
                 </div>
               </div>
             </div>
           </motion.div>
         </div>
-      </div>
 
-      {/* =========================================================
-          BOTTOM STATEMENT
-      ========================================================= */}
-
-      <div className="mx-auto max-w-[1440px] px-6 pb-24 pt-28 sm:px-10 sm:pb-28 sm:pt-36 lg:px-16 lg:pb-36 lg:pt-40">
-        <div className="grid gap-8 lg:grid-cols-[0.25fr_1fr_0.3fr] lg:items-end lg:gap-12">
-          {/* Number */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease }}
-          >
-            <span className="font-serif text-6xl leading-none text-[#123d2b]/10 sm:text-7xl">
-              01
-            </span>
-
-            <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.25em] text-[#8c7138]">
-              Our beginning
-            </p>
-          </motion.div>
+        {/* =====================================================
+            STATEMENT BAND + PILLARS
+        ===================================================== */}
+        <motion.div
+          {...reveal(0.05)}
+          className="relative mt-14 overflow-hidden rounded-[24px] bg-[#082F27] shadow-[0_24px_55px_-25px_rgba(8,47,39,0.3)] sm:mt-16"
+        >
+          {/* Decorative rings */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-32 h-[26rem] w-[26rem] rounded-full border border-[#DFC587]/15"
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-8 -top-16 h-64 w-64 rounded-full border border-[#DFC587]/10"
+          />
 
           {/* Statement */}
-          <motion.div
-            initial={{ opacity: 0, y: 35 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{
-              duration: 0.85,
-              ease,
-            }}
-          >
-            <p className="font-serif text-[clamp(2.7rem,5vw,5.2rem)] leading-[0.92] tracking-[-0.035em]">
-              A home should give you{" "}
-              <span className="text-[#a48345]">room to breathe.</span>
+          <div className="relative bg-gradient-to-r from-[#174C3C] to-[#082F27] px-7 py-10 sm:px-12 sm:py-12 lg:px-16 lg:py-14">
+            <p className="font-serif text-[clamp(1.9rem,3.6vw,3.4rem)] leading-[1.08] tracking-[-0.02em] text-[#DFC587]">
+              30 Acres of Possibilities.
+              <span className="block text-white">One Distinctive Address.</span>
             </p>
-          </motion.div>
+          </div>
 
-          {/* Supporting copy */}
-          <motion.div
-            initial={{ opacity: 0, x: 25 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.15,
-              ease,
-            }}
-          >
-            <p className="text-[13px] leading-6 text-[#123d2b]/55 sm:text-sm sm:leading-7">
-              A place where nature, space and everyday life come together.
-            </p>
+          {/* Pillars */}
+          <ul className="relative grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+            {pillars.map(({ label, Icon }) => (
+              <li
+                key={label}
+                className="flex items-center gap-4 border-t border-white/10 px-6 py-6 first:border-t-0 sm:px-8 lg:border-l lg:border-t-0 lg:first:border-l-0 lg:py-8"
+              >
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#C9A45C]/50 text-[#DFC587]">
+                  <Icon size={20} strokeWidth={1.4} aria-hidden="true" />
+                </span>
+                <span className="text-[13px] font-medium leading-snug text-[#F7F4EC] sm:text-sm">
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
 
-            <Link
-              href="#experience"
-              className="group mt-5 inline-flex items-center gap-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#123d2b] transition-colors duration-300 hover:text-[#8c7138]"
-            >
-              Explore the lifestyle
-
-              <ArrowUpRight
-                size={15}
-                strokeWidth={1.5}
-                aria-hidden="true"
-                className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* =========================================================
-          NEXT SECTION INDICATOR
-      ========================================================= */}
-
-      <div className="flex justify-center pb-10 sm:pb-12">
-        <Link
-          href="#experience"
-          aria-label="Continue to EcoVista experience"
-          className="group flex flex-col items-center gap-3 text-[#123d2b]/35 transition-colors duration-300 hover:text-[#8c7138]"
+        {/* =====================================================
+            SIGN-OFF
+        ===================================================== */}
+        <motion.div
+          {...reveal(0.05)}
+          className="mx-auto mt-16 flex max-w-xl flex-col items-center text-center sm:mt-20"
         >
-          <span className="text-[9px] font-bold uppercase tracking-[0.3em]">
-            Experience
-          </span>
+          <Leaf
+            aria-hidden="true"
+            size={26}
+            strokeWidth={1.2}
+            className="text-[#C9A45C]"
+          />
 
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[#123d2b]/15 transition-colors duration-300 group-hover:border-[#c9a45c]">
-            <motion.span
-              animate={{ y: [0, 4, 0] }}
-              transition={{
-                duration: 1.7,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <ArrowDown size={14} strokeWidth={1.4} aria-hidden="true" />
-            </motion.span>
-          </span>
-        </Link>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.34em] text-[#082F27] sm:text-[13px]">
+            Eco Vista Township
+          </p>
+
+          <span className="mt-4 h-px w-14 bg-[#C9A45C]" />
+
+          <p className="mt-5 font-serif text-3xl italic leading-tight text-[#B38E3F] sm:text-4xl">
+            Where Land Becomes Legacy.
+          </p>
+        </motion.div>
       </div>
     </section>
   );
